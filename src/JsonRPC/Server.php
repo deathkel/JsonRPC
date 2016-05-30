@@ -1,24 +1,28 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: KEL
+ * Date: 2016/3/10
+ * Time: 14:33
+ */
 
-namespace JsonRPC;
+namespace App\Library\RPC;
 
+use App\Library\ApiFramework\ApiClient;
 use Closure;
 use BadFunctionCallException;
 use Exception;
 use InvalidArgumentException;
+use LogicException;
 use ReflectionFunction;
 use ReflectionMethod;
 
 class InvalidJsonRpcFormat extends Exception {};
 class InvalidJsonFormat extends Exception {};
 class AuthenticationFailure extends Exception {};
-class ResponseEncodingFailure extends Exception {};
 
 /**
- * JsonRPC server class
- *
- * @package JsonRPC
- * @author  Frederic Guillot
+ * RPC server class
  */
 class Server
 {
@@ -91,6 +95,7 @@ class Server
      *
      * @access public
      * @param  string    $request
+     * TODO use Laravel request
      */
     public function __construct($request = '')
     {
@@ -294,10 +299,9 @@ class Server
      * Return the response to the client
      *
      * @access public
-     * @param  array $data Data to send to the client
-     * @param  array $payload Incoming data
+     * @param  array    $data      Data to send to the client
+     * @param  array    $payload   Incoming data
      * @return string
-     * @throws ResponseEncodingFailure
      */
     public function getResponse(array $data, array $payload = array())
     {
@@ -313,39 +317,7 @@ class Server
         $response = array_merge($response, $data);
 
         @header('Content-Type: application/json');
-
-        $encodedResponse = json_encode($response);
-        $jsonError = json_last_error();
-
-        if ($jsonError !== JSON_ERROR_NONE) {
-            switch ($jsonError) {
-                case JSON_ERROR_NONE:
-                    $errorMessage = 'No errors';
-                    break;
-                case JSON_ERROR_DEPTH:
-                    $errorMessage = 'Maximum stack depth exceeded';
-                    break;
-                case JSON_ERROR_STATE_MISMATCH:
-                    $errorMessage = 'Underflow or the modes mismatch';
-                    break;
-                case JSON_ERROR_CTRL_CHAR:
-                    $errorMessage = 'Unexpected control character found';
-                    break;
-                case JSON_ERROR_SYNTAX:
-                    $errorMessage = 'Syntax error, malformed JSON';
-                    break;
-                case JSON_ERROR_UTF8:
-                    $errorMessage = 'Malformed UTF-8 characters, possibly incorrectly encoded';
-                    break;
-                default:
-                    $errorMessage = 'Unknown error';
-                    break;
-            }
-
-            throw new ResponseEncodingFailure($errorMessage,$jsonError);
-        }
-
-        return $encodedResponse;
+        return json_encode($response);
     }
 
     /**
@@ -383,7 +355,7 @@ class Server
      * @access public
      * @return boolean
      */
-    private function isBatchRequest()
+    Public function isBatchRequest()
     {
         return array_keys($this->payload) === range(0, count($this->payload) - 1);
     }
@@ -445,7 +417,8 @@ class Server
 
             $result = $this->executeProcedure(
                 $this->payload['method'],
-                empty($this->payload['params']) ? array() : $this->payload['params']
+                empty($this->payload['params']) ? array() : $this->payload['params'],
+                $this->payload['app']
             );
 
             return $this->getResponse(array('result' => $result), $this->payload);
@@ -486,16 +459,6 @@ class Server
                 'error' => array(
                     'code' => -32602,
                     'message' => 'Invalid params'
-                )),
-                $this->payload
-            );
-        }
-        catch(ResponseEncodingFailure $e){
-            return $this->getResponse(array(
-                'error' => array(
-                    'code' => -32603,
-                    'message' => 'Internal error',
-                    'data' => $e->getMessage()
                 )),
                 $this->payload
             );
@@ -542,7 +505,7 @@ class Server
      * @param  array    $params       Procedure params
      * @return mixed
      */
-    public function executeProcedure($procedure, array $params = array())
+    public function executeProcedure($procedure, array $params = array(),$app=null)
     {
         if (isset($this->callbacks[$procedure])) {
             return $this->executeCallback($this->callbacks[$procedure], $params);
@@ -552,6 +515,25 @@ class Server
         }
 
         foreach ($this->instances as $instance) {
+            //针对ApiClient调用而增加,每个app能找到与之对应的instance
+            if($instance instanceof ApiClient){
+                if($instance->getAppName()==$app){
+                    if (method_exists($instance, $procedure)) {
+                        $result=$this->executeMethod($instance, $procedure, $params);
+                        if($result==false){
+                            $res['status']=0;
+                            $res['error_code']=$instance->getErrorCode();
+                            $res['error_message']=$instance->getErrorMessage();
+                            return $res;
+                        }else{
+                            $res['status']=1;
+                            $res['data']=$result;
+                            return $res;
+                        }
+                    }
+                }
+            }
+
             if (method_exists($instance, $procedure)) {
                 return $this->executeMethod($instance, $procedure, $params);
             }
