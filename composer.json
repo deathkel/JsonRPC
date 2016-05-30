@@ -13,7 +13,15 @@
         "php": ">=5.3.4"
     },
     "versioin":"2.0.0",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.0-dev"
+        }
+    },
     "autoload": {
-        "psr-0": {"JsonRPC": "src/"}
+        "psr-0": {"JsonRPC": "src/"},
+        "psr-4": {
+            "deathkel\\jsonRPC\\": "src/"
+        }
     }
 }
