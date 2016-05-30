@@ -12,6 +12,7 @@
     "require": {
         "php": ">=5.3.4"
     },
+    "versioin":"2.0.0",
     "autoload": {
         "psr-0": {"JsonRPC": "src/"}
     }
