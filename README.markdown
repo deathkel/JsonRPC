@@ -1,4 +1,4 @@
-JsonRPC PHP Client and Server
+JsonRPC PHP Client and Server For Laravel
 =============================
 
 A simple Json-RPC client/server that just works.

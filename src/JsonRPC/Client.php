@@ -339,16 +339,13 @@ class Client
     private function doRequest(array $payload)
     {
         $this->curl = curl_init();
-//        dump($this->url);
         curl_setopt($this->curl, CURLOPT_POST, true); //Post query false
         curl_setopt($this->curl, CURLOPT_URL,$this->url); //Url for get method
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, 1);  // Return transfer as string
 //        curl_setopt($this->curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
         curl_setopt($this->curl, CURLOPT_HTTPHEADER, $this->getHeaders($payload));
-//        dump($payload);
         curl_setopt($this->curl,CURLOPT_POSTFIELDS,json_encode($payload));//set json content
         $response = curl_exec($this->curl);
-//        dump($response);
         if (false === $response) {
             throw new ConnectionFailureException('Unable to establish a connection');
         }
@@ -358,10 +355,8 @@ class Client
             Log::DEBUG('==> Request: '.PHP_EOL.json_encode($payload, JSON_PRETTY_PRINT));
             Log::DEBUG('==> Response: '.PHP_EOL.json_encode($response, JSON_PRETTY_PRINT));
             dump('==> Request: '.$payload);
-            dump('==> Request: '.$response);
+            dump('==> Response: '.$response);
         }
-//        dump('response');
-//        dump($response);
         return is_array($response) ? $response : array();
     }
 
