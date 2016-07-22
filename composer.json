@@ -19,9 +19,8 @@
         }
     },
     "autoload": {
-        "psr-0": {"JsonRPC": "src/"},
         "psr-4": {
-            "deathkel\\JsonRPC\\": "src/"
+            "Deathkel\\JsonRPC\\": "src/"
         }
     }
 }
