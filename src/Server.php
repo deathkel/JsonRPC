@@ -6,7 +6,7 @@
  * Time: 14:33
  */
 
-namespace JsonRPC;
+namespace Deathkel\JsonRPC;
 
 use Closure;
 use BadFunctionCallException;

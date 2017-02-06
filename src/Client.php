@@ -1,6 +1,6 @@
 <?php
 
-namespace JsonRPC;
+namespace Deathkel\JsonRPC;
 
 use Exception;
 use BadFunctionCallException;

@@ -1,6 +1,6 @@
 <?php
 
-namespace JsonRPC;
+namespace Deathkel\JsonRPC;
 
 class AccessDeniedException extends \Exception
 {
