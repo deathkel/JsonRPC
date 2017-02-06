@@ -22,7 +22,7 @@ class Client
     /**
      * curl instance
      */
-    private $curl;
+    protected $curl;
     /**
      * URL of the server
      * URL=HOST+APP
@@ -30,12 +30,10 @@ class Client
      * @access private
      * @var string
      */
-    private $url;
+    protected $url;
 
-    /**
-     * app of the server
-     */
-    private $app;
+
+    protected $payload;
     /**
      * If the only argument passed to a function is an array
      * assume it contains named arguments
@@ -149,18 +147,10 @@ class Client
         return $this->execute($method, $params);
     }
 
-    //as same as used in business client
-    public function call($app,$method, array $params)
+    public function setPayload($payload)
     {
-        $this->app=$app;
-//        // Allow to pass an array and use named arguments
-//        if ($this->named_arguments && count($params) === 1 && is_array($params[0])) {
-//            $params = $params[0];
-//        }
-
-        return $this->execute('call',[$method,$params]);
+        $this->payload = $payload;
     }
-
     /**
      * Set authentication parameters
      *
@@ -238,10 +228,12 @@ class Client
     {
         $payload = array(
             'jsonrpc' => '2.0',
-            'app'=>$this->app,
             'method' => $procedure,
             'id' => mt_rand()
         );
+        if(isset($this->payload)){
+            $payload = array_merge($payload,$this->payload);
+        }
 
         if (! empty($params)) {
             $payload['params'] = $params;
