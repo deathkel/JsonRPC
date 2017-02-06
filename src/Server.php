@@ -416,8 +416,7 @@ class Server
 
             $result = $this->executeProcedure(
                 $this->payload['method'],
-                empty($this->payload['params']) ? array() : $this->payload['params'],
-                $this->payload['app']
+                empty($this->payload['params']) ? array() : $this->payload['params']
             );
 
             return $this->getResponse(array('result' => $result), $this->payload);
@@ -504,7 +503,7 @@ class Server
      * @param  array    $params       Procedure params
      * @return mixed
      */
-    public function executeProcedure($procedure, array $params = array(),$app=null)
+    public function executeProcedure($procedure, array $params = array())
     {
         if (isset($this->callbacks[$procedure])) {
             return $this->executeCallback($this->callbacks[$procedure], $params);
