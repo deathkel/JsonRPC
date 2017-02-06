@@ -12,9 +12,9 @@ class ConnectionFailureException extends Exception {};
 class ServerErrorException extends Exception {};
 
 /**
- * JsonRPC client class
+ * json-rpc client class
  *
- * @package JsonRPC
+ * @package json-rpc
  * @author  Frederic Guillot
  */
 class Client
@@ -314,10 +314,10 @@ class Client
     public function handleHttpErrors(array $headers)
     {
         $exceptions = array(
-            '401' => 'JsonRPC\AccessDeniedException',
-            '403' => 'JsonRPC\AccessDeniedException',
-            '404' => 'JsonRPC\ConnectionFailureException',
-            '500' => 'JsonRPC\ServerErrorException',
+            '401' => 'json-rpc\AccessDeniedException',
+            '403' => 'json-rpc\AccessDeniedException',
+            '404' => 'json-rpc\ConnectionFailureException',
+            '500' => 'json-rpc\ServerErrorException',
         );
 
         foreach ($headers as $header) {

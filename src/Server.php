@@ -8,7 +8,6 @@
 
 namespace JsonRPC;
 
-use App\Library\ApiFramework\ApiClient;
 use Closure;
 use BadFunctionCallException;
 use Exception;
@@ -169,7 +168,7 @@ class Server
      */
     public function sendAuthenticationFailureResponse()
     {
-        header('WWW-Authenticate: Basic realm="JsonRPC"');
+        header('WWW-Authenticate: Basic realm="json-rpc"');
         header('Content-Type: application/json');
         header('HTTP/1.0 401 Unauthorized');
         echo '{"error": "Authentication failed"}';
@@ -515,25 +514,6 @@ class Server
         }
 
         foreach ($this->instances as $instance) {
-            //针对ApiClient调用而增加,每个app能找到与之对应的instance
-            if($instance instanceof ApiClient){
-                if($instance->getAppName()==$app){
-                    if (method_exists($instance, $procedure)) {
-                        $result=$this->executeMethod($instance, $procedure, $params);
-                        if($result==false){
-                            $res['status']=0;
-                            $res['error_code']=$instance->getErrorCode();
-                            $res['error_message']=$instance->getErrorMessage();
-                            return $res;
-                        }else{
-                            $res['status']=1;
-                            $res['data']=$result;
-                            return $res;
-                        }
-                    }
-                }
-            }
-
             if (method_exists($instance, $procedure)) {
                 return $this->executeMethod($instance, $procedure, $params);
             }
