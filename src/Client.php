@@ -346,8 +346,8 @@ class Client
         if ($this->debug) {
             Log::DEBUG('==> Request: '.PHP_EOL.json_encode($payload, JSON_PRETTY_PRINT));
             Log::DEBUG('==> Response: '.PHP_EOL.json_encode($response, JSON_PRETTY_PRINT));
-            dump('==> Request: '.$payload);
-            dump('==> Response: '.$response);
+            dump(['==> Request: ' => $payload]);
+            dump(['==> Response: ' => $response]);
         }
         return is_array($response) ? $response : array();
     }
