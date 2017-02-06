@@ -6,7 +6,7 @@
  * Time: 14:33
  */
 
-namespace App\Library\RPC;
+namespace JsonRPC;
 
 use App\Library\ApiFramework\ApiClient;
 use Closure;

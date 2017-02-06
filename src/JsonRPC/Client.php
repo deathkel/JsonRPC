@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Library\RPC;
+namespace JsonRPC;
 
 use Exception;
 use BadFunctionCallException;
