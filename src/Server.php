@@ -11,6 +11,7 @@ namespace Deathkel\JsonRPC;
 use Closure;
 use BadFunctionCallException;
 use Exception;
+use Illuminate\Support\Facades\Request;
 use InvalidArgumentException;
 use LogicException;
 use ReflectionFunction;
@@ -198,7 +199,8 @@ class Server
      */
     public function allowHosts(array $hosts)
     {
-        if (! in_array($_SERVER['REMOTE_ADDR'], $hosts)) {
+        $ip = Request::getClientIp();
+        if (! in_array($ip, $hosts)) {
             $this->sendForbiddenResponse();
         }
     }
