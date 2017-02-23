@@ -21,7 +21,7 @@ class InvalidJsonFormat extends Exception {};
 class AuthenticationFailure extends Exception {};
 
 /**
- * RPC server class
+ * RPC server class WTF? why canot update?!!!!
  */
 class Server
 {
