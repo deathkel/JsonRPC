@@ -6,7 +6,7 @@ use Exception;
 use BadFunctionCallException;
 use InvalidArgumentException;
 use RuntimeException;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class ConnectionFailureException extends Exception {};
 class ServerErrorException extends Exception {};
@@ -251,7 +251,6 @@ class Client
     public function parseResponse(array $payload)
     {
         if ($this->isBatchResponse($payload)) {
-//            dump('isBatchResponse');
             $results = array();
 
             foreach ($payload as $response) {
@@ -260,7 +259,6 @@ class Client
 
             return $results;
         }
-//        dump('isSingleRespone');
         return $this->getResult($payload);
     }
 
@@ -334,45 +332,27 @@ class Client
         curl_setopt($this->curl, CURLOPT_POST, true); //Post query false
         curl_setopt($this->curl, CURLOPT_URL,$this->url); //Url for get method
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, 1);  // Return transfer as string
-//        curl_setopt($this->curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+        if ($this->ssl_verify_peer){
+            curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, false);
+        }
         curl_setopt($this->curl, CURLOPT_HTTPHEADER, $this->getHeaders($payload));
         curl_setopt($this->curl,CURLOPT_POSTFIELDS,json_encode($payload));//set json content
         $response = curl_exec($this->curl);
         if (false === $response) {
             throw new ConnectionFailureException('Unable to establish a connection');
         }
-        $response = json_decode($response, true);
+        $responseJson = json_decode($response, true);
         curl_close($this->curl);
+        if (!$responseJson){
+            Log::DEBUG("JSON RPC response null==> Response:" . $response);
+        }
         if ($this->debug) {
             Log::DEBUG('==> Request: '.PHP_EOL.json_encode($payload, JSON_PRETTY_PRINT));
-            Log::DEBUG('==> Response: '.PHP_EOL.json_encode($response, JSON_PRETTY_PRINT));
-            dump(['==> Request: ' => $payload]);
-            dump(['==> Response: ' => $response]);
+            Log::DEBUG('==> Response: '.PHP_EOL.json_encode($responseJson, JSON_PRETTY_PRINT));
         }
-        return is_array($response) ? $response : array();
+        return is_array($responseJson) ? $responseJson : array();
     }
 
-    //TODO delete
-    private function doRequest_old(array $payload)
-    {
-        $stream = @fopen(trim($this->url), 'r', false, $this->getContext($payload));
-
-        if (! is_resource($stream)) {
-            throw new ConnectionFailureException('Unable to establish a connection');
-        }
-
-        $metadata = stream_get_meta_data($stream);
-        $this->handleHttpErrors($metadata['wrapper_data']);
-
-        $response = json_decode(stream_get_contents($stream), true);
-
-        if ($this->debug) {
-            error_log('==> Request: '.PHP_EOL.json_encode($payload, JSON_PRETTY_PRINT));
-            error_log('==> Response: '.PHP_EOL.json_encode($response, JSON_PRETTY_PRINT));
-        }
-
-        return is_array($response) ? $response : array();
-    }
 
     /**
      * prepare HTTP header
@@ -407,14 +387,6 @@ class Client
      * @param  array    $payload
      * @return mixed
      */
-//    private function getResult(array $payload)
-//    {
-//        if (isset($payload['error']['code'])) {
-//            $this->handleRpcErrors($payload['error']);
-//        }
-//
-//        return isset($payload['result']) ? $payload['result'] : null;
-//    }
     private function getResult(array $payload)
     {
         if (isset($payload['error']['code'])) {
